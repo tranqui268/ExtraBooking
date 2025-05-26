@@ -1,0 +1,42 @@
+body {
+    background-color: #DEE33E;
+}
+
+.login-box {
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    width: 400px;
+    max-width: 800px;
+    margin: auto;
+}
+
+.logo-image{
+    width: 100px;
+    height: 100px;
+}
+
+.logo {
+    font-size: 30px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.btn-custom {
+    background-color: #DEE33E;
+    color: black;
+}
+
+.btn-custom:hover {
+    background-color: #9FA324;
+}
+
+.social-btn img {
+    width: 20px;
+    margin-right: 5px;
+}
+
+.text-login-custom{
+    color: #9FA324;
+}
