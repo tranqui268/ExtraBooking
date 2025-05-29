@@ -6,10 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-
     public function up(): void
     {
-        Schema::table('customers', function (Blueprint $table) {
+        Schema::table('employees', function (Blueprint $table) {
             $table->unsignedBigInteger('user_id')->nullable()->unique()->after('id');
             $table->foreign('user_id')
                   ->references('id')
@@ -21,8 +20,8 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('customers', function (Blueprint $table) {
-            $table->dropForeign('user_id');
+        Schema::table('employees', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);
             $table->dropColumn('user_id');
         });
     }

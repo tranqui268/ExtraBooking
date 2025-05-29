@@ -19,4 +19,8 @@ class EmployeeRepository extends BaseRepository implements EmployeeRepositoryInt
     {
         
     }
+
+    public function getEmployeeByUserId($userId){
+        return Employee::where('user_id',$userId)->first();
+    }
 }

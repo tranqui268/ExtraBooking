@@ -1,36 +1,44 @@
 <?php
 
-use App\Enums\AppointmentStatus;
-use App\Enums\ScheduleStatus;
+namespace App\Services;
+
+use App\Models\Customer;
+use App\Models\EmployeeSchedule;
 use App\Models\Service;
 use App\Repositories\Appointment\AppointmentRepositoryInterface;
+use App\Repositories\Customer\CustomerRepositoryInterface;
 use App\Repositories\EmployeeSchedule\EmployeeScheduleRepositoryInterface;
 use App\Repositories\TimeSlot\TimeSlotRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AppointmentBookingService{
     protected $timeSlotRepo;
     protected $appoitmentRepo;
     protected $employeeScheduleRepo;
+    protected $customerRepo;
 
     public function __construct(
         TimeSlotRepositoryInterface $timeSlotRepo,
         AppointmentRepositoryInterface $appointmentRepo,
-        EmployeeScheduleRepositoryInterface $employeeScheduleRepo
+        EmployeeScheduleRepositoryInterface $employeeScheduleRepo,
+        CustomerRepositoryInterface $customerRepo
     ){
         $this->timeSlotRepo = $timeSlotRepo;
         $this->appoitmentRepo = $appointmentRepo;
         $this->employeeScheduleRepo = $employeeScheduleRepo;
+        $this->customerRepo = $customerRepo;
     }
 
     public function bookAppointment(array $bookingData){
+        Log::info('request',['data' => $bookingData]);
         return DB::transaction(function() use ($bookingData){
             $appointmentDate = Carbon::parse($bookingData['appointment_date']);
             $service = Service::find($bookingData['service_id']);
 
             if(!$service){
-                throw new Exception('Dịch vụ không tồn tại');
+                throw new \Exception('Dịch vụ không tồn tại');
             }
 
             // Tính toán số slot cần thiết
@@ -45,25 +53,43 @@ class AppointmentBookingService{
                 $bookingData['start_time'],
                 $slotNeeded
             );
+            Log::info('Slot trống: ', ['data' => $consecutiveSlots]);
 
             if (count($consecutiveSlots) < $slotNeeded) {
-                throw new Exception('Không có đủ slot liên tiếp trống');
+                throw new \Exception('Không có đủ slot liên tiếp trống');
             }
 
             $assignedEmployee = $this->findAvailableEmployeeForSlots($consecutiveSlots);
-
+            Log::info('Nhân viên: ', ['data' => $assignedEmployee]);
             if (!$assignedEmployee) {
-                throw new Exception('Không có nhân viên rảnh trong khung giờ này');
+                throw new \Exception('Không có nhân viên rảnh trong khung giờ này');
+            }
+
+            $startTime = $consecutiveSlots[0]['start_time'];
+            $endTime = $consecutiveSlots[count($consecutiveSlots)-1]['end_time'];
+
+            $startTimeCarbon = Carbon::parse($bookingData['start_time']);
+            $limitTime = $startTimeCarbon->copy()->addHour();
+
+            if($startTime->gt($limitTime)){
+                
+
+            }
+
+            $customer = Customer::find($bookingData['customer_id']);
+
+            if(!$customer){
+                throw new \Exception('Khách hàng không tồn tại');
             }
 
             $appointmentData = [
-                'customer_id' => $bookingData['customer_id'],
+                'customer_id' => $customer->id,
                 'service_id' => $bookingData['service_id'],
                 'appointment_date' => $appointmentDate->format('Y-m-d'),
-                'start_time' => $bookingData['start_time'],
-                'end_time' => Carbon::parse($bookingData['start_time'])->addMinutes($serviceDuration)->format('H:i:s'),
-                'employee_id' => $assignedEmployee->employee_id,
-                'total_amount' => $service->price,
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+                'employee_id' => $assignedEmployee->id,
+                'total_amount' => $service->base_price,
                 'status' => 'confirmed',
                 'notes' => $bookingData['notes'] ?? null
             ];
@@ -71,12 +97,21 @@ class AppointmentBookingService{
             $appointment = $this->appoitmentRepo->create($appointmentData);
 
             // phân công nhân viên
-            foreach($consecutiveSlots as $slot){
-                $this->employeeScheduleRepo->assginEmployeeToSlot(
-                    $assignedEmployee->id,
-                    $slot->id,
-                    $appointment->id
-                );
+            foreach ($consecutiveSlots as $slot) {                   
+                    $slotId = null;
+                    if (is_object($slot)) {
+                        $slotId = $slot->slot_id ?? $slot->id ?? null;
+                    } elseif (is_array($slot)) {
+                        $slotId = $slot['slot_id'] ?? $slot['id'] ?? null;
+                    }
+                    
+                    if ($slotId) {
+                        $this->employeeScheduleRepo->assginEmployeeToSlot(
+                            $assignedEmployee->id,
+                            $slotId,
+                            $appointment->id
+                        );
+                    }
             }
 
             return $appointment;
@@ -84,39 +119,98 @@ class AppointmentBookingService{
         });
     }
 
-    protected function findConsecutiveAvailableSlots($allSlots, $startTime, $slotsNeeded){
+    private function findOrCreateCustomer(array $customerData)
+    {
+        return Customer::firstOrCreate(
+            ['email' => $customerData['email']],
+            $customerData 
+        );
+    }
+
+    protected function findConsecutiveAvailableSlots($allSlots, $startTime, $slotsNeeded)
+    {
         $startTimeCarbon = Carbon::parse($startTime);
         $consecutiveSlots = [];
-
-        foreach($allSlots as $slot){
-            $slotStart = Carbon::parse($slot->start_time);
-
+        
+        foreach ($allSlots as $slot) {
+            // Lấy slot_id để truy vấn
+            $slotId = null;
+            $slotStartTime = null;
+            $maxEmployees = 2;
+            
+            if (is_object($slot)) {
+                $slotId = $slot->slot_id ?? $slot->id ?? null;
+                $slotStartTime = $slot->start_time ?? null;
+                $maxEmployees = $slot->max_employees ?? 2;
+            } elseif (is_array($slot)) {
+                $slotId = $slot['slot_id'] ?? $slot['id'] ?? null;
+                $slotStartTime = $slot['start_time'] ?? null;
+                $maxEmployees = $slot['max_employees'] ?? 2;
+            }
+            
+            if (!$slotId || !$slotStartTime) {
+                continue;
+            }
+            
+            $slotStart = Carbon::parse($slotStartTime);
+            
             if ($slotStart->gte($startTimeCarbon)) {
-                $bookedEmployees = $slot->employeeSchedules()
-                  ->where('status',ScheduleStatus::Booked)
-                  ->count();
-
-                if ($bookedEmployees < $slot->max_employees) {
+                // Truy vấn trực tiếp để kiểm tra số nhân viên đã được đặt
+                $bookedEmployees = EmployeeSchedule::where('slot_id', $slotId)
+                    ->where('status', 'booked')
+                    ->count();
+                
+                if ($bookedEmployees < $maxEmployees) {
                     $consecutiveSlots[] = $slot;
-
+                    
                     if (count($consecutiveSlots) >= $slotsNeeded) {
+                        // Kiểm tra tính liên tiếp
                         if ($this->areSlotsConsecutive($consecutiveSlots)) {
-                            return array_slice($consecutiveSlots,0,$slotsNeeded);
-                        }                       
+                            return array_slice($consecutiveSlots, 0, $slotsNeeded);
+                        }
                     }
-                }else{
-                    $consecutiveSlots = [];
+                } else {
+                    $consecutiveSlots = []; 
                 }
             }
         }
+
         return $consecutiveSlots;
     }
 
-    protected function areSlotsConsecutive($slots){
-        for ($i=1; $i < count($slots) ; $i++) { 
-            $prevSlotEnd = Carbon::parse($slots[$i-1]->end_time);
-            $currentSlotStart = Carbon::parse($slots[$i]->start_time);
+    protected function areSlotsConsecutive($slots)
+    {
+        if (count($slots) <= 1) {
+            return true;
+        }
 
+        for ($i = 1; $i < count($slots); $i++) {
+            // Lấy thời gian từ slot trước và slot hiện tại
+            $prevSlotEndTime = null;
+            $currentSlotStartTime = null;
+            
+            // Xử lý slot trước
+            if (is_object($slots[$i-1])) {
+                $prevSlotEndTime = $slots[$i-1]->end_time ?? null;
+            } elseif (is_array($slots[$i-1])) {
+                $prevSlotEndTime = $slots[$i-1]['end_time'] ?? null;
+            }
+            
+            // Xử lý slot hiện tại
+            if (is_object($slots[$i])) {
+                $currentSlotStartTime = $slots[$i]->start_time ?? null;
+            } elseif (is_array($slots[$i])) {
+                $currentSlotStartTime = $slots[$i]['start_time'] ?? null;
+            }
+            
+            if (!$prevSlotEndTime || !$currentSlotStartTime) {
+                return false;
+            }
+            
+            $prevSlotEnd = Carbon::parse($prevSlotEndTime);
+            $currentSlotStart = Carbon::parse($currentSlotStartTime);
+            
+            // Kiểm tra liên tiếp (end_time của slot trước = start_time của slot sau)
             if (!$prevSlotEnd->eq($currentSlotStart)) {
                 return false;
             }
@@ -124,21 +218,47 @@ class AppointmentBookingService{
         return true;
     }
 
-    protected function findAvailableEmployeeForSlots($slots){
+
+     protected function findAvailableEmployeeForSlots($slots)
+    {
+        Log::info('findAvailableEmployeeForSlots');
+        // Lấy danh sách nhân viên có thể làm việc trong tất cả các slot
         $availableEmployees = null;
+        
+        foreach ($slots as $slot) {
+            // Lấy slot_id
+            $slotId = null;
+            if (is_object($slot)) {
+                $slotId = $slot->slot_id ?? $slot->id ?? null;
+            } elseif (is_array($slot)) {
+                $slotId = $slot['slot_id'] ?? $slot['id'] ?? null;
+            }
+            
+            if (!$slotId) {
+                continue;
+            }
 
-        foreach($slots as $slot){
-            $slotAvailableEmployees = $this->employeeScheduleRepo->getAvailableEmployee($slot->id);
-
+            Log::info('slot_id' ,['data'=>$slotId]);
+            
+            $slotAvailableEmployees = $this->employeeScheduleRepo->getAvailableEmployee($slotId);
+            Log::info('slotAvailableEmployees' ,['data'=>$slotAvailableEmployees]);
+            
             if ($availableEmployees === null) {
                 $availableEmployees = $slotAvailableEmployees;
-            }else{
-                $availableEmployees = $availableEmployees->filters(function($employee) use ($slotAvailableEmployees){
-                    return $slotAvailableEmployees->contains('id',$employee->id);
+            } else {
+                // Lấy giao của các nhân viên có sẵn
+                $availableEmployees = $availableEmployees->filter(function($employee) use ($slotAvailableEmployees) {
+                    return $slotAvailableEmployees->contains('id', $employee->id);
                 });
             }
+            
+            // Nếu không còn nhân viên nào có sẵn cho tất cả slot, thoát sớm
+            if ($availableEmployees && $availableEmployees->count() == 0) {
+                return null;
+            }
         }
-        return $availableEmployees ? $availableEmployees->first() : null;
+
+        return $availableEmployees && $availableEmployees->count() > 0 ? $availableEmployees->first() : null;
     }
 
     public function getAvailableTimeSlots(string $date){
@@ -150,7 +270,7 @@ class AppointmentBookingService{
             $appointment = $this->appoitmentRepo->getById($appointmentId);
 
             if (!$appointment) {
-                throw new Exception('Không tìm thấy lịch hẹn');
+                throw new \Exception('Không tìm thấy lịch hẹn');
             }
 
             $this->appoitmentRepo->updateStatus($appointmentId,'cancelled');

@@ -39,6 +39,11 @@ class AppServiceProvider extends ServiceProvider
             \App\Repositories\EmployeeSchedule\EmployeeScheduleRepository::class
         );
 
+        $this->app->bind(
+            \App\Repositories\Customer\CustomerRepositoryInterface::class,
+            \App\Repositories\Customer\CustomerRepository::class
+        );
+
         
     }
 

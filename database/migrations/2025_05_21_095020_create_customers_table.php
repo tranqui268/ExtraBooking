@@ -10,7 +10,6 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('user_id')->unsigned()->nullable();
             $table->string('name', 50)->nullable(false);
             $table->string('email')->unique();
             $table->string('phone',11)->nullable(false);

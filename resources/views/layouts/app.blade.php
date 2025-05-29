@@ -10,6 +10,7 @@
     </title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    @yield('head')
     <style>
         body {
             background-color: #f8f9fa;
@@ -25,7 +26,7 @@
     @include('common.navbar')
     @yield('content')
     @include('layouts.scripts')
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    @include('scripts.auth-scripts')
 </body>
 
 </html>

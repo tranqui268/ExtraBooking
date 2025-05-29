@@ -5,6 +5,7 @@ namespace App\Repositories\Appointment;
 use App\Models\Appointment;
 use App\Repositories\BaseRepository;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class AppointmentRepository extends BaseRepository implements AppointmentRepositoryInterface{
 
@@ -39,6 +40,42 @@ class AppointmentRepository extends BaseRepository implements AppointmentReposit
              ->get();
     }
 
+    public function getAppointmentsByCustomer(int $customerId){
+        return Appointment::where('customer_id',$customerId)
+             ->orderBy('id','desc')
+             ->get();
+    }
+
+    public function getAppointmentsUser($user, string $view, $date){
+        Log::info($user->customer->id);
+        $query = Appointment::where('customer_id',$user->customer->id);
+
+        if ($view === 'week') {
+            $startOfWeek = Carbon::parse($date)->startOfWeek();
+            $endOfWeek = Carbon::parse($date)->endOfWeek();
+            $query->whereBetween('appointment_date',[$startOfWeek,$endOfWeek]);
+        }
+
+        $appointments = $query->with(['customer','service'])
+            ->orderBy('appointment_date')
+            ->orderBy('start_time')
+            ->get()
+            ->map(function($appointment){
+                return [
+                    'id' => $appointment->id,
+                    'customer_name' => $appointment->customer->name,
+                    'service' => $appointment->service->service_name,
+                    'date' => $appointment->appointment_date,
+                    'start_time' => $appointment->start_time->format('H:i:s'),
+                    'end_time' => $appointment->end_time->format('H:i:s'),
+                    'notes' => $appointment->notes
+                ];
+
+            });
+        
+        return $appointments;
+    }
+
     public function updateStatus(int $appointmentId, string $status){
         return Appointment::where('id',$appointmentId)
            ->update([
@@ -61,6 +98,5 @@ class AppointmentRepository extends BaseRepository implements AppointmentReposit
 
            })
            ->get();
-
     }
 }

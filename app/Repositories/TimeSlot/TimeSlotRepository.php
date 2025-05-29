@@ -2,7 +2,6 @@
 
 namespace App\Repositories\TimeSlot;
 
-use App\Models\Service;
 use App\Models\TimeSlot;
 use App\Models\WorkingHour;
 use App\Repositories\BaseRepository;
@@ -64,6 +63,32 @@ class TimeSlotRepository extends BaseRepository implements TimeSlotRepositoryInt
             
             $startTime->addMinutes(60);
         }
+
+        $slotAvailable = $this->getAvailableTimeSlots($selectedDate);
+
+        if (count($slotAvailable) > 0) {
+            foreach ($timeSlots as $i => $slot){
+                $slotTime = Carbon::parse($slot['time']);
+                $slotStart = $slotTime->copy()->startOfHour();
+                $slotEnd = $slotTime->copy()->endOfHour();
+
+                $hasAvailableSlot = false;
+                foreach ($slotAvailable as $available) {
+                    $availableTime = Carbon::parse($available->start_time);
+                    $availableTime = $availableTime->startOfMinute();
+                    if ($availableTime->between($slotStart, $slotEnd)) {
+                        $hasAvailableSlot = true;
+                        break;
+                    }
+                }
+
+                if (!$hasAvailableSlot) {
+                    $timeSlots[$i]['disabled'] = true;
+                }
+
+            }
+        }
+
         return $timeSlots;
     }
 
@@ -108,12 +133,14 @@ class TimeSlotRepository extends BaseRepository implements TimeSlotRepositoryInt
     public function getAvailableTimeSlots(string $date){
         $date = Carbon::parse($date);
         return TimeSlot::where('slot_date', $date->format('Y-m-d'))
-           ->whereHas('employeeSchedules', function($query){
-               $query->where('status','available');
-           },'<',2)
-           ->orWhereDoesntHave('employeeSchedules')
-           ->orderBy('start_time')
-           ->get();
+           ->where(function($query) {
+            $query->whereHas('employeeSchedules', function($subQuery) {
+                $subQuery->where('status', 'booked');
+            }, '<', 2)
+            ->orWhereDoesntHave('employeeSchedules');
+        })
+        ->orderBy('start_time')
+        ->get();
     }
 
     public function getTimeSlotForDateRange(string $startDate, string $endDate){

@@ -9,7 +9,6 @@
         <h4 class="text-center mb-4">Login to your account</h4>
 
         <form method="POST">
-            @csrf
             <div class="form-group">
                 <input type="email" id="email" name="email" class="form-control" placeholder="Email" required autofocus>
             </div>
@@ -29,8 +28,10 @@
                 <a href="#" class="text-login-custom">Forgot Password?</a>
             </div>
 
-            <button type="submit" class="btn btn-custom btn-block mb-3">Sign in with email</button>
+            <button onclick="loginAsync()" type="button" class="btn btn-custom btn-block mb-3">Sign in with email</button>
         </form>
+        <div id="message" class="text-center mt-3" style="color: green;"></div>
+        <div id="error" class="text-center mt-3" style="color: red;"></div>
 
         <div class="text-center mb-3">— Or login with —</div>
         <div class="d-flex justify-content-between">
@@ -43,7 +44,10 @@
         </div>
 
         <div class="text-center mt-3">
-            Don’t have an account? <a href="#" class="text-login-custom font-weight-bold">Get Started</a>
+            Don’t have an account? <a href={{ Route('register') }} class="text-login-custom font-weight-bold">Get Started</a>
         </div>
     </div>
+@endsection
+@section('scripts')
+   @include('scripts.auth-scripts')
 @endsection

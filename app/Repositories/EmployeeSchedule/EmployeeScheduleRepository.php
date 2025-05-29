@@ -4,6 +4,7 @@ namespace App\Repositories\EmployeeSchedule;
 
 use App\Enums\AppointmentStatus;
 use App\Enums\ScheduleStatus;
+use App\Models\Employee;
 use App\Models\EmployeeSchedule;
 use App\Repositories\BaseRepository;
 use Carbon\Carbon;
@@ -30,8 +31,8 @@ class EmployeeScheduleRepository extends BaseRepository implements EmployeeSched
             ->pluck('employee_id')
             ->toArray();
 
-        return EmployeeSchedule::whereNotIn('employee_id',$bookedEmployeeIds)
-            ->where('is_active',1)
+        return Employee::whereNotIn('id',$bookedEmployeeIds)
+            ->where('is_active', 1)
             ->get();
     }
 

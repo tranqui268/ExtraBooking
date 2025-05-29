@@ -3,22 +3,7 @@
 @section('content')
 <div class="container py-4">
     <h3 class="mb-4 text-center">Đặt lịch sửa xe</h3>
-    <form id="bookingForm">
-        <div class="form-group">
-            <label for="name">Họ tên khách hàng <span class="text-danger">*</span> </label>
-            <input type="text" class="form-control" id="name" required>
-        </div>
-
-        <div class="form-group">
-            <label for="phone">Số điện thoại <span class="text-danger">*</span></label>
-            <input type="tel" class="form-control" id="phone" required>
-        </div>
-
-        <div class="form-group">
-            <label for="email">Email (tuỳ chọn)</label>
-            <input type="email" class="form-control" id="email">
-        </div>
-
+    <form id="bookingForm">       
         <div class="form-group">
             <label for="bookingDate">Chọn ngày đặt lịch <span class="text-danger">*</span></label>
             <input type="date" class="form-control" id="bookingDate" required min="{{ date('Y-m-d') }}">

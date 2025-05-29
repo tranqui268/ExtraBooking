@@ -13,26 +13,25 @@
 
   <div class="collapse navbar-collapse" id="mainNavbar">
     <ul class="navbar-nav mr-auto">
-      <li class="nav-item">
+      <li id="booking-menu" class="nav-item">
         <a class="nav-link" href="{{ url('/bookings') }}" data-page="bookings">Đặt lịch</a>
       </li>
-      <li class="nav-item">
+      <li id="service-menu" class="nav-item">
         <a class="nav-link" href="{{ url('/services') }}" data-page="services">Dịch vụ</a>
       </li>
-      <li class="nav-item">
+      <li id="employee-menu" class="nav-item">
         <a class="nav-link" href="{{ url('/employees') }}" data-page="employees">Thợ sửa</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url('/appointments') }}" data-page="appointments">Lịch hẹn</a>
       </li>
     </ul>
 
     <ul class="navbar-nav ml-auto">
       <li class="nav-item">
-        <span class="navbar-text mr-3">Chào user</span>
+        <span id="user-name" class="navbar-text mr-3" data-id="">Chào user</span>
       </li>
-      <li class="nav-item">
-        <form method="POST" style="display: inline;">
-          @csrf
-          <button class="btn btn-outline-light btn-sm" type="submit">Đăng xuất</button>
-        </form>
+          <button class="btn btn-outline-light btn-sm" onclick="logout()">Đăng xuất</button>
       </li>
     </ul>
   </div>

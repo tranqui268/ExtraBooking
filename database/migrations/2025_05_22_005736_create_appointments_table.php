@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('employee_id',5)->nullable(false);
             $table->string('service_id',4)->nullable(false);
             $table->date('appointment_date')->nullable(false);
+            $table->decimal('total_amount',8,2);
             $table->time('start_time')->nullable(false);
             $table->time('end_time')->nullable(false);
             $table->enum('status',['pending','confirmed','cancelled','completed'])->default('pending');
