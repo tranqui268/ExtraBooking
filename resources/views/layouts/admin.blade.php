@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    @yield('head')
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 </head>
@@ -25,8 +26,8 @@
             <a id="user-menu" href="{{ url('/admin/inventory') }}" class="nav-link">
                 <i class="icon bi bi-box"></i> User Management
             </a>
-            <a id="service-menu" href="{{ url('/admin/repairs') }}" class="nav-link">
-                <i class="icon bi bi-tools"></i> Repair Service
+            <a id="service-menu" href="{{ url('/admin/services') }}" class="nav-link">
+                <i class="icon bi bi-tools"></i> Service
             </a>
             <a id="customer-menu" href="{{ url('/admin/customers') }}" class="nav-link">
                 <i class="icon bi bi-people"></i> Customers

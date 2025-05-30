@@ -273,6 +273,26 @@ class AppointmentBookingService{
                 throw new \Exception('Không tìm thấy lịch hẹn');
             }
 
+                   
+            $now = Carbon::now();
+            $isToday = Carbon::parse($appointment->appointment_date)->isSameDay($now);    
+
+            if ($isToday) {
+                $startDateTime = Carbon::parse($appointment->start_time);
+                $minutesUntilStart = $now->diffInMinutes($startDateTime,false);
+
+                Log::debug('Cancel Appointment Check', [
+                    'appointmentId' => $appointmentId,
+                    'startDateTime' => $startDateTime->toDateTimeString(),
+                    'now' => $now->toDateTimeString(),
+                    'minutesUntilStart' => $minutesUntilStart
+                ]);
+
+                if ($minutesUntilStart < 30) {
+                    throw new \Exception('Không thể hủy lịch hẹn dưới 30 phút trước giờ bắt đầu');
+                }
+            }
+
             $this->appoitmentRepo->updateStatus($appointmentId,'cancelled');
 
             $appointmentDate = Carbon::parse($appointment->appointment_date);

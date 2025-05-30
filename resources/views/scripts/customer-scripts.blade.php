@@ -26,8 +26,8 @@
                                 '<td>' + customer.email + '</td>' +                               
                                 '<td>' + (customer.phone) + '</td>' +
                                 '<td>' + (customer.address) + '</td>' +
-                                '<td>' + ("2") + '</td>' +
-                                '<td>' + ("100000") + '</td>' +
+                                '<td>' + customer.appointment_count + '</td>' +
+                                '<td>' + parseFloat(customer.total_amount).toLocaleString() + '</td>' +
                                 '<td>' +
                                 '<a class="editUser text-info mr-2" data-id="' + customer.id + '"><i class="bi bi-pencil-fill" style="color: blue"></i></a>' +
                                 '</td>' +
@@ -135,6 +135,22 @@
 
             row.addClass('editing');
         });
+
+        // Save edit
+        $(document).on('click', '.saveEdit', function (e){
+            e.preventDefault();
+
+
+        });
+
+        $(document).on('click','.cancelEdit', function(e){
+            e.preventDefault();
+
+            const row = $(this).closest('tr');
+            const id = $(this).data('id');
+
+            fetchCustomers();
+        })
 
     });
 </script>

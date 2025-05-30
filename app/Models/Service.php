@@ -16,4 +16,8 @@ class Service extends Model
     protected $keyType = 'string';
 
     protected $fillable = ['id', 'service_name','duration', 'description', 'base_price', 'duration_minutes', 'is_delete'];
+
+    public function appointments(){
+        return $this->hasMany(Appointment::class,'service_id');
+    }
 }

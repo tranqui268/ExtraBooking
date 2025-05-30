@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Customer;
 
+use App\Models\Appointment;
 use App\Models\Customer;
 use App\Repositories\BaseRepository;
 
@@ -31,6 +32,18 @@ class CustomerRepository extends BaseRepository implements CustomerRepositoryInt
         if(!empty($filters['address'])){
             $query->where('address','like','%'. $filters['address'] .'%');
         }
+
+        $query->addSelect([
+            'appointment_count' => Appointment::selectRaw('COUNT(*)')
+                ->whereColumn('customer_id', 'customers.id'),
+            'total_amount' => Appointment::selectRaw('COALESCE(SUM(total_amount), 0)')
+                ->whereColumn('customer_id', 'customers.id')
+                ->where('status', 'confirmed'), // chỉ tính appointment hoàn thành completed
+            'last_appointment_date' => Appointment::select('appointment_date')
+                ->whereColumn('customer_id', 'customers.id')
+                ->orderBy('appointment_date', 'desc')
+                ->limit(1)
+        ]);
        
         return $query->orderBy('id','desc')->paginate($filters['perPage'] ?? 6);
 

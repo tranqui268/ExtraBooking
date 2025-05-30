@@ -138,6 +138,7 @@ class AppointmentController extends Controller
                     'date' => $appointment->appointment_date,
                     'start_time' => $appointment->start_time->format('H:i:s'),
                     'end_time' => $appointment->end_time->format('H:i:s'),
+                    'status' => $appointment->status,
                     'notes' => $appointment->notes
                 ]
             ]);

@@ -233,8 +233,8 @@
             const endMinutes = endHour * 60 + endMinute;
             const durationMinutes = endMinutes - startMinutes;
 
-            // Calculate position from 7:00 AM
-            const baseMinutes = 7 * 60; // 7:00 AM in minutes
+            // Calculate position from 8:00 AM
+            const baseMinutes = 8 * 60; // 7:00 AM in minutes
             const offsetMinutes = startMinutes - baseMinutes;
             const slotHeight = 60; // Each slot is 60px
 
@@ -282,22 +282,44 @@
                 method: 'GET',
                 success: function (response) {
                     const booking = response.data;
+                    let statusClass = '';
+                    switch (booking.status) {
+                        case 'pending':
+                            statusClass = 'text-warning';
+                            break;
+                        case 'confirmed':
+                            statusClass = 'text-primary';
+                            break;
+                        case 'cancelled':
+                            statusClass = 'text-danger';
+                            break;
+                        case 'completed':
+                            statusClass = 'text-success';
+                            break;
+                        default:
+                            statusClass = 'text-secondary';
+                    }
+
                     const detailsHtml = `
                             <div class="row">
+                                <input type="hidden" id="booking-id" value="${booking.id}">
                                 <div class="col-md-6">
-                                    <strong>Client:</strong> ${booking.customer_name}
+                                    <strong>Khách hàng:</strong> ${booking.customer_name}
                                 </div>
                                 <div class="col-md-6">
-                                    <strong>Service:</strong> ${booking.service}
+                                    <strong>Dịch vụ:</strong> ${booking.service}
                                 </div>
                                 <div class="col-md-6">
-                                    <strong>Date:</strong> ${booking.date}
+                                    <strong>Ngày đặt lịch:</strong> ${booking.date}
                                 </div>
                                 <div class="col-md-6">
-                                    <strong>Time:</strong> ${booking.start_time} - ${booking.end_time}
+                                    <strong>Thời gian:</strong> ${booking.start_time} - ${booking.end_time}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Trạng thái:</strong> <span class="${statusClass}">${booking.status}</span>
                                 </div>
                                 <div class="col-12">
-                                    <strong>Notes:</strong> ${booking.notes || 'No notes'}
+                                    <strong>Ghi chú:</strong> ${booking.notes || 'No notes'}
                                 </div>
                             </div>
                         `;
@@ -310,6 +332,37 @@
 
             });
         }
+
+        $('#cancelBooking').on('click', function () {
+            const bookingId = $('#booking-id').val();
+            console.log('ID cần xử lý:', bookingId);
+
+            $.ajax({
+                url: `api/appointments/${bookingId}/cancel`,
+                method: 'PUT',
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            text: response.message
+                        })
+                    }
+                    $('#bookingModal').modal('hide');
+                    loadBookings();
+
+                },
+                error: function (xhr) {
+                    const errors = xhr.responseJSON?.message || { message: 'Lỗi hệ thống.' };
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hủy lịch thất bại',
+                        text: JSON.stringify(errors)
+                    })
+                }
+
+            });
+
+        });
 
         function formattedDate(today) {
             const yyyy = today.getFullYear();

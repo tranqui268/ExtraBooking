@@ -36,3 +36,9 @@ Route::prefix('customers')->group(function(){
     Route::get('/',[CustomerController::class,'getAllCustomer']);
 });
 
+Route::prefix('services')->group(function(){
+    Route::get('/',[ServiceController::class,'getWithFilters']);
+    Route::post('/',[ServiceController::class,'create']);
+    Route::put('/{id}',[ServiceController::class,'update']);
+});
+

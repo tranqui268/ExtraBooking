@@ -33,7 +33,7 @@ abstract class BaseRepository implements RepositoryInterface{
     public function update($id,array $data){
         $result = $this -> getById($id);
         if($result){
-            $this ->model -> update($data);
+            $result->update($data);
             return $result;
         }
         return false;
@@ -42,7 +42,7 @@ abstract class BaseRepository implements RepositoryInterface{
     public function delete($id){
         $result = $this -> getById($id);
         if($result){
-            $this ->model -> delete();
+            $result -> delete();
             return $result;
         }
         return false;

@@ -57,6 +57,7 @@ class AppointmentRepository extends BaseRepository implements AppointmentReposit
         }
 
         $appointments = $query->with(['customer','service'])
+            ->where('status','confirmed')
             ->orderBy('appointment_date')
             ->orderBy('start_time')
             ->get()
@@ -68,6 +69,7 @@ class AppointmentRepository extends BaseRepository implements AppointmentReposit
                     'date' => $appointment->appointment_date,
                     'start_time' => $appointment->start_time->format('H:i:s'),
                     'end_time' => $appointment->end_time->format('H:i:s'),
+                    'status' => $appointment->status,
                     'notes' => $appointment->notes
                 ];
 

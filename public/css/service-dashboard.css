@@ -1,0 +1,62 @@
+.card {
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+#searchService {
+    border-radius: 0.375rem;
+}
+
+#addServiceBtn {
+    padding: 8px 16px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.table td,
+.table th {
+    vertical-align: middle;
+}
+
+.btn-warning,
+.btn-danger {
+    padding: 4px 10px;
+    font-size: 0.85rem;
+}
+
+.modal-content {
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.modal-title {
+    font-weight: 600;
+    color: #333;
+}
+
+.modal-footer .btn {
+    min-width: 100px;
+}
+
+canvas {
+    background-color: #fff;
+    border-radius: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .row>div {
+        margin-bottom: 1.5rem;
+    }
+}

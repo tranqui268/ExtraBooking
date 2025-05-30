@@ -25,8 +25,10 @@ Route::get('/employee', function(){
     return view('employee.dashboard');
 });
 
+
 Route::prefix('/admin')->group(function(){
     Route::get('/customers', [CustomerController::class,'index']);
+    Route::get('/services',[ServiceController::class,'showDashboard'] );
 });
 
 
