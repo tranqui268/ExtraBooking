@@ -32,15 +32,25 @@ class AppointmentBookingService{
     }
 
     public function bookAppointment(array $bookingData){
+        
         Log::info('request',['data' => $bookingData]);
         return DB::transaction(function() use ($bookingData){
             $startTimeCarbon = Carbon::parse($bookingData['start_time']);
+            $appointmentDate = Carbon::parse($bookingData['appointment_date']);
             $now = Carbon::now();
-            if ($startTimeCarbon->lessThan($now)) {
-                throw new \Exception('Không được đặt thời gian trong quá khứ');
+
+            if ($appointmentDate->isBefore(Carbon::today())) {
+                throw new \Exception('Không được đặt ngày trong quá khứ');
             }
 
-            $appointmentDate = Carbon::parse($bookingData['appointment_date']);
+            $isToday = $appointmentDate->isSameDay($now);
+            if ($isToday) {
+                if ($startTimeCarbon->lessThan($now)) {
+                    throw new \Exception('Không được đặt thời gian trong quá khứ');
+                }
+            }
+
+            
             $service = Service::find($bookingData['service_id']);
 
             if(!$service){
@@ -82,11 +92,11 @@ class AppointmentBookingService{
                 throw new \Exception('Khung giờ này đã hết lịch phù hợp');
             }
 
-            if ($startTime->lt($minBookingTime)) {
-                throw new \Exception('Cần đặt lịch trước ít nhất 30 phút so với giờ bắt đầu.');
+            if ($isToday) {
+                if ($startTime->lt($minBookingTime)) {
+                    throw new \Exception('Cần đặt lịch trước ít nhất 30 phút so với giờ bắt đầu.');
+                }
             }
-
-           
 
             $customer = Customer::find($bookingData['customer_id']);
 
