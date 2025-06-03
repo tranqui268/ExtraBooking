@@ -23,9 +23,6 @@
                 class="nav-link {{ request()->is('admin') ? 'active' : '' }}">
                 <i class="icon bi bi-grid-fill"></i> Dashboard
             </a>
-            <a id="user-menu" href="{{ url('/admin/inventory') }}" class="nav-link">
-                <i class="icon bi bi-box"></i> User Management
-            </a>
             <a id="service-menu" href="{{ url('/admin/services') }}" class="nav-link">
                 <i class="icon bi bi-tools"></i> Service
             </a>

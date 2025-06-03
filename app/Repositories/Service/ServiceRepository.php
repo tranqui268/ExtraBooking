@@ -2,8 +2,11 @@
 
 namespace App\Repositories\Service;
 
+use App\Helpers\CacheHelper;
 use App\Models\Service;
 use App\Repositories\BaseRepository;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ServiceRepository extends BaseRepository implements ServiceRepositoryInterface{
@@ -22,10 +25,33 @@ class ServiceRepository extends BaseRepository implements ServiceRepositoryInter
         return $query->orderBy('created_at','desc')->get();
     }
 
+    public function update($id, array $data){
+        try {
+            $updated = Service::where('id',$id)->update($data);
+            if ($updated) {
+                CacheHelper::clearCache('service:all');
+            }
+            return $updated;
+        } catch (\Exception $e) {
+            Log::error('Error updating service', ['id' => $id, 'error' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    public function create(array $data){
+        try {
+            $service = Service::create($data);
+            CacheHelper::clearCache('service:all');
+            return $service;
+        } catch (\Exception $e) {
+            Log::error('Error creating service', ['error' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
     public function generateId($serviceName){
         $firstChar = Str::ascii($serviceName)[0];
         $firstChar = strtoupper($firstChar); 
-
 
         $count = Service::where('id', 'LIKE', $firstChar . '%')->count();
 

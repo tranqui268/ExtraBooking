@@ -1,5 +1,7 @@
 @extends('layouts.app')
-
+@section('head')
+   <link rel="stylesheet" href="{{ asset('css/booking.css') }}">
+@endsection
 @section('content')
 <div class="container py-4">
     <h3 class="mb-4 text-center">Đặt lịch sửa xe</h3>

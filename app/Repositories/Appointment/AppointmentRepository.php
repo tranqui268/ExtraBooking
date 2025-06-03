@@ -15,7 +15,51 @@ class AppointmentRepository extends BaseRepository implements AppointmentReposit
 
     public function filters($filters)
     {
-        
+        $query = $this->model->query();
+
+        if (!empty($filters['customer_name'])) {
+            $customerName = $filters['customer_name'];
+            $query->whereHas('customer', function($q) use ($customerName){
+                $q->where('name','like','%'. $customerName . '%');
+            });
+        }
+
+        if (!empty($filters['service_name'])) {
+            $serviceName = $filters['service_name'];
+            $query->whereHas('service', function($q) use ($serviceName){
+                $q->where('service_name','like','%'. $serviceName .'%');
+            });
+        }
+
+        if (!empty($filters['employee_name'])) {
+            $employeeName = $filters['employee_name'];
+            $query->whereHas('employee', function($q) use ($employeeName){
+                $q->where('name','like','%' . $employeeName . '%');
+            });
+        }
+
+        if (!empty($filters['status'])) {
+            $query->where('status',$filters['status']);
+        }
+
+        if (!empty($filters['date_from'])) {
+            $query->whereDate('appointment_date', '>=', $filters['date_from']);
+        }
+
+        if (!empty($filters['date_to'])) {
+            $query->whereDate('appointment_date','<=',$filters['date_to']);
+        }
+
+        if (!empty($filters['price_from'])) {
+            $query->where('total_amount', '>=', $filters['price_from']);
+        }
+        if (!empty($filters['price_to'])) {
+            $query->where('total_amount','<=', $filters['price_to']);
+        }
+
+        return $query->with(['customer','employee','service'])
+                     ->orderBy('appointment_date', 'desc')
+                     ->paginate(10);
     }
 
     public function softDelete($id)
@@ -72,7 +116,6 @@ class AppointmentRepository extends BaseRepository implements AppointmentReposit
                     'status' => $appointment->status,
                     'notes' => $appointment->notes
                 ];
-
             });
         
         return $appointments;

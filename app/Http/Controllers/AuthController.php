@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
@@ -23,7 +24,7 @@ class AuthController extends Controller
         $this->employeeRepo = $employeeRepo;
     }
 
-    public function index(){
+    public function index(Request $request){
         return view('auth.login');
     }
 
@@ -68,10 +69,10 @@ class AuthController extends Controller
             value: $token,
             minutes: 60,
             path: '/',
-            domain: '127.0.0.1',
+            domain: null,
             secure: env('APP_ENV') === 'production',
             httpOnly: true,
-            sameSite: 'Strict'
+            sameSite: 'Lax'
         );
 
         return response()->json([
@@ -101,10 +102,13 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth-token')->plainTextToken;
 
+        $remember = $request->boolean('remember');
+        $tokenTtl = $remember ? 60 * 24 *30 : 60;
+
         $cookie = Cookie::make(
             name: 'auth_token',
             value: $token,
-            minutes: 60,
+            minutes: $tokenTtl,
             path: '/',
             domain: '127.0.0.1',
             secure: env('APP_ENV') === 'production',

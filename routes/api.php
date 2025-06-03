@@ -27,6 +27,7 @@ Route::prefix('appointments')->group(function () {
     Route::get('/byCustomer/{customerId}',[AppointmentController::class, 'getAppointmentsByCustomer']);
     Route::get('/bookings',[AppointmentController::class,'getAppointmentsUser']);
     Route::get('/{appointmentId}',[AppointmentController::class,'getById']);
+    Route::get('/',[AppointmentController::class,'getWithFilters']);
 })->middleware(['auth:sanctum']);
 
 

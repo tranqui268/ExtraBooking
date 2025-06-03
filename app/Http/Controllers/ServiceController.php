@@ -6,6 +6,8 @@ use App\Charts\ServiceUsageChart;
 use App\Http\Requests\StoreServiceRequest;
 use App\Repositories\Service\ServiceRepositoryInterface;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class ServiceController extends Controller
 {
@@ -63,18 +65,47 @@ class ServiceController extends Controller
     }
 
     public function getAll(){
-        $result = $this->serviceRepo->getAll();
-        if($result){
+        // $result = $this->serviceRepo->getAll();
+        // if($result){
+        //     return response()->json([
+        //         'success' => true,
+        //         'message' => 'Lấy dữ liệu thành công',
+        //         'data' => $result
+        //     ]);
+        // }
+        // return response()->json([
+        //         'success' => false,
+        //         'message' => 'Lấy dữ liệu thất bại'
+        // ]);
+
+        try {
+            $cacheKey = 'service:all';
+            $ttl = 60 * 60 * 24;
+
+            $result = Cache::store('redis')->remember($cacheKey, $ttl, function(){
+                Log::info('Fetching service from database');
+                return $this->serviceRepo->getAll();
+            });
+
+            if ($result && $result->isNotEmpty()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Lấy dữ liệu thành công',
+                    'data' => $result
+                ]);
+            }
+
             return response()->json([
-                'success' => true,
-                'message' => 'Lấy dữ liệu thành công',
-                'data' => $result
-            ]);
-        }
-        return response()->json([
                 'success' => false,
-                'message' => 'Lấy dữ liệu thất bại'
-        ]);
+                'message' => 'Không có dịch vụ nào'
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Error fetching services', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function getWithFilters(Request $request){

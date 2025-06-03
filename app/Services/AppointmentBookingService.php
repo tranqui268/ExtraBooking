@@ -34,6 +34,12 @@ class AppointmentBookingService{
     public function bookAppointment(array $bookingData){
         Log::info('request',['data' => $bookingData]);
         return DB::transaction(function() use ($bookingData){
+            $startTimeCarbon = Carbon::parse($bookingData['start_time']);
+            $now = Carbon::now();
+            if ($startTimeCarbon->lessThan($now)) {
+                throw new \Exception('Không được đặt thời gian trong quá khứ');
+            }
+
             $appointmentDate = Carbon::parse($bookingData['appointment_date']);
             $service = Service::find($bookingData['service_id']);
 
@@ -68,13 +74,19 @@ class AppointmentBookingService{
             $startTime = $consecutiveSlots[0]['start_time'];
             $endTime = $consecutiveSlots[count($consecutiveSlots)-1]['end_time'];
 
-            $startTimeCarbon = Carbon::parse($bookingData['start_time']);
+           
+            $minBookingTime = $now->copy()->addMinutes(30);
             $limitTime = $startTimeCarbon->copy()->addHour();
 
             if($startTime->gt($limitTime)){
-                
-
+                throw new \Exception('Khung giờ này đã hết lịch phù hợp');
             }
+
+            if ($startTime->lt($minBookingTime)) {
+                throw new \Exception('Cần đặt lịch trước ít nhất 30 phút so với giờ bắt đầu.');
+            }
+
+           
 
             $customer = Customer::find($bookingData['customer_id']);
 
@@ -117,14 +129,6 @@ class AppointmentBookingService{
             return $appointment;
 
         });
-    }
-
-    private function findOrCreateCustomer(array $customerData)
-    {
-        return Customer::firstOrCreate(
-            ['email' => $customerData['email']],
-            $customerData 
-        );
     }
 
     protected function findConsecutiveAvailableSlots($allSlots, $startTime, $slotsNeeded)

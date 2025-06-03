@@ -24,6 +24,29 @@ class AppointmentController extends Controller
         return view('appointment.index');
     }
 
+    public function getWithFilters(Request $request){
+        try {
+            $appointments = $this->appointmentRepo->filters($request);
+            return response()->json([
+                'success' => true,
+                'data' => $appointments->items(),
+                'pagination' => [
+                    'total' => $appointments->total(),
+                    'page_size' => $appointments->perPage(),
+                    'current_page' => $appointments->currentPage(),
+                    'last_page' => $appointments->lastPage(),
+                ],
+                'message' => 'Lấy danh sách thành công'
+            ]); 
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
+
+    }
+
     public function getAvailableTimeSlots(Request $request){
         try {
             $date = $request->input('date');
@@ -148,6 +171,5 @@ class AppointmentController extends Controller
                 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
             ], 500);
         }
-
     }
 }

@@ -14,7 +14,7 @@ Route::get('/login',[AuthController::class,'index'])->name('login');
 
 Route::get('/services',[ServiceController::class,'index']);
 Route::get('/employees',[EmployeeController::class,'index']);
-Route::get("/bookings",[BookingController::class,'index']);
+Route::get("/bookings",[BookingController::class,'index'])->name('bookings');
 Route::get('/appointments',[AppointmentController::class,'showAppointmentUser']);
 
 Route::get('/admin', function(){
@@ -29,6 +29,7 @@ Route::get('/employee', function(){
 Route::prefix('/admin')->group(function(){
     Route::get('/customers', [CustomerController::class,'index']);
     Route::get('/services',[ServiceController::class,'showDashboard'] );
+    Route::get('/bookings',[BookingController::class,'showDashboard']);
 });
 
 

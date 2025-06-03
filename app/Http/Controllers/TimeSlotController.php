@@ -28,10 +28,16 @@ class TimeSlotController extends Controller
     public function generateTimeSlotDb(Request $request){
         $date = $request->input('date');
         $result = $this->timeSlotRepo->generateTimeSlotsDb($date);
+        if ($result) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Tạo time slot cho database',
+                'data' => $result
+            ]);
+        }
         return response()->json([
-            'success' => true,
-            'message' => 'Tạo time slot cho database',
-            'data' => $result
+            'sucess' => false,
+            'message' => 'Tạo time slot thất bại'
         ]);
     }
 }
