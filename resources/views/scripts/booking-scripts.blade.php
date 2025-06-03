@@ -50,10 +50,12 @@
 
         // Hiển thị thời gian thực hiện
         serviceSelect.addEventListener('change', function () {
+            resetTimeSlots();
             const selected = this.options[this.selectedIndex];
             const duration = selected.dataset.duration;
 
             if (duration) {
+                console.log('SERVICE ' + duration);
                 durationText.style.display = 'block';
                 durationText.textContent = `Thời gian thực hiện: ${duration} phút.`;
 
