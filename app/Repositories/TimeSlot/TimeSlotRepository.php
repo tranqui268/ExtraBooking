@@ -94,6 +94,8 @@ class TimeSlotRepository extends BaseRepository implements TimeSlotRepositoryInt
 
     public function generateTimeSlotsDb(string $date){
         $date = Carbon::parse($date);
+        $now = Carbon::now();
+        $isToday = $date->isSameDay($now);
 
         if ($date->isBefore(Carbon::today())) {
             return;
@@ -107,8 +109,10 @@ class TimeSlotRepository extends BaseRepository implements TimeSlotRepositoryInt
             return;
         }
 
-        if (Carbon::now()->greaterThan($workingHour->end_time)) {
-            return;
+        if ($isToday) {
+            if (Carbon::now()->greaterThan($workingHour->end_time)) {
+                return;
+            }
         }
 
         $startTime = Carbon::parse($workingHour->start_time);

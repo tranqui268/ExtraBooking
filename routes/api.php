@@ -6,6 +6,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TimeSlotController;
+use App\Http\Controllers\WorkingHourController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -41,5 +42,9 @@ Route::prefix('services')->group(function(){
     Route::get('/',[ServiceController::class,'getWithFilters']);
     Route::post('/',[ServiceController::class,'create']);
     Route::put('/{id}',[ServiceController::class,'update']);
+});
+
+Route::prefix('workinghours')->group(function(){
+    Route::get('/byDate',[WorkingHourController::class, 'getWorkingHourByDate']);
 });
 

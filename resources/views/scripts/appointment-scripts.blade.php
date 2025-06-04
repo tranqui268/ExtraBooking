@@ -102,6 +102,8 @@
                     </div>
 
                 `);
+                console.log('FULLDATE'+day.fullDate);
+                
 
                 const dayBookings = bookings.filter(booking =>
                     booking.date === day.fullDate
@@ -130,14 +132,14 @@
             const startOfWeek = new Date(currentWeek);
             startOfWeek.setDate(currentWeek.getDate() - currentWeek.getDay() + 1);
 
-            for (let i = 0; i < 6; i++) {
+            for (let i = 0; i < 7; i++) {
                 const day = new Date(startOfWeek);
                 day.setDate(startOfWeek.getDate() + i);
 
                 days.push({
                     name: day.toLocaleDateString('en-US', { weekday: 'short' }),
                     number: day.getDate(),
-                    fullDate: day.toISOString().split('T')[0]
+                    fullDate: formattedDate(day)
                 });
             }
             return days;
@@ -157,8 +159,8 @@
                     <div class="booking-item ${sizeClass}" data-booking-id="${booking.id}" title="${booking.customer_name} - ${booking.service} (${timeDisplay})">
                         <div class="booking-avatar">${booking.customer_name.charAt(0)}</div>
                         <div class="flex-grow-1" style="min-width: 0;">
-                            <div class="booking-title text-truncate">${booking.customer_name}</div>
-                            <div class="booking-subtitle text-truncate">${booking.service}</div>
+                            <div class="booking-title text-truncate">${booking.service}</div>
+                            <div class="booking-subtitle text-truncate">${booking.employee}</div>
                         </div>
                     </div>
                 `);
@@ -304,7 +306,7 @@
                             <div class="row">
                                 <input type="hidden" id="booking-id" value="${booking.id}">
                                 <div class="col-md-6">
-                                    <strong>Khách hàng:</strong> ${booking.customer_name}
+                                    <strong>Nhân viên:</strong> ${booking.employee}
                                 </div>
                                 <div class="col-md-6">
                                     <strong>Dịch vụ:</strong> ${booking.service}

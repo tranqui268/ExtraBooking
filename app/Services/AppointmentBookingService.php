@@ -104,6 +104,15 @@ class AppointmentBookingService{
                 throw new \Exception('Khách hàng không tồn tại');
             }
 
+            if ($this->hasConflictingAppointment(
+                $customer->id, 
+                $appointmentDate->format('Y-m-d'), 
+                $startTime, $endTime
+                )
+            ) {
+                throw new \Exception('Bạn đã có lịch hẹn trong khung thời gian này. Vui lòng chọn thời gian khác.');
+            }
+
             $appointmentData = [
                 'customer_id' => $customer->id,
                 'service_id' => $bookingData['service_id'],
@@ -323,6 +332,31 @@ class AppointmentBookingService{
 
         });
     }
+
+    private function addTimeConflictConditions($query, $startTime, $endTime){
+        $query->where(function($q) use ($startTime, $endTime) {
+            $q->where('start_time', '<=', $startTime)
+            ->where('end_time', '>', $startTime);
+        })->orWhere(function($q) use ($startTime, $endTime) {
+            $q->where('start_time', '<', $endTime)
+            ->where('end_time', '>=', $endTime);
+        })->orWhere(function($q) use ($startTime, $endTime) {
+            $q->where('start_time', '>=', $startTime)
+            ->where('end_time', '<=', $endTime);
+        });
+    }
+
+    private function hasConflictingAppointment($customerId, $appointmentDate, $startTime, $endTime){
+        return DB::table('appointments')
+            ->where('customer_id', $customerId)
+            ->where('appointment_date', $appointmentDate)
+            ->where('status', '!=', 'cancelled')
+            ->where(function($query) use ($startTime, $endTime) {
+                $this->addTimeConflictConditions($query, $startTime, $endTime);
+            })
+            ->exists(); 
+    }
+
 
 
 }

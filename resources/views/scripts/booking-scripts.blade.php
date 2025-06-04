@@ -1,6 +1,6 @@
 <script>
     const timeSlotCache = new Map();
-    const STORE_CLOSING_TIME = '20:00';
+    let STORE_CLOSING_TIME = '20:00';
     $(document).ready(function () {
         const serviceSelect = document.getElementById('serviceSelect');
         const durationText = document.getElementById('durationText');
@@ -69,7 +69,7 @@
 
         const generateTimeSlots = () => {
             const selectedDate = document.getElementById('bookingDate').value;
-
+            fetchWorkingHour(selectedDate);
 
             const today = new Date();
             const selectedDateValue = new Date(selectedDate);
@@ -137,7 +137,7 @@
         timeSlotsContainer.on('click', '.time-btn:not(:disabled)', function () {
             timeSlotsContainer.find('.time-btn').removeClass('active');
             $(this).addClass('active');
-            console.log('Selected time:', $(this).data('time')); // Debug
+            console.log('Selected time:', $(this).data('time'));
         });
 
         const renderTimeSlots = (res) => {
@@ -255,7 +255,7 @@
                     }
                 },
                 error: function (xhr) {
-                    const errors = xhr.responseJSON?.errors || { message: 'Lỗi hệ thống.' };
+                    const errors = xhr.responseJSON?.message || { message: 'Lỗi hệ thống.' };
                     Swal.fire({
                         icon: 'error',
                         title: 'Đặt lịch thất bại',
@@ -317,6 +317,21 @@
             }
         });
     };
+
+    function fetchWorkingHour(selectedDate){
+        $.ajax({
+            url: 'api/workinghours/byDate',
+            method: 'GET',
+            data: {
+                date: selectedDate
+            },
+            success: function(response){
+                STORE_CLOSING_TIME = response.data.end_time;
+                console.log(STORE_CLOSING_TIME);
+            }
+        });
+
+    }
 
 
 

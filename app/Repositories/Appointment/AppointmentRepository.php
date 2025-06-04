@@ -100,7 +100,7 @@ class AppointmentRepository extends BaseRepository implements AppointmentReposit
             $query->whereBetween('appointment_date',[$startOfWeek,$endOfWeek]);
         }
 
-        $appointments = $query->with(['customer','service'])
+        $appointments = $query->with(['customer','service','employee'])
             ->where('status','confirmed')
             ->orderBy('appointment_date')
             ->orderBy('start_time')
@@ -110,6 +110,7 @@ class AppointmentRepository extends BaseRepository implements AppointmentReposit
                     'id' => $appointment->id,
                     'customer_name' => $appointment->customer->name,
                     'service' => $appointment->service->service_name,
+                    'employee' => $appointment->employee->name,
                     'date' => $appointment->appointment_date,
                     'start_time' => $appointment->start_time->format('H:i:s'),
                     'end_time' => $appointment->end_time->format('H:i:s'),
