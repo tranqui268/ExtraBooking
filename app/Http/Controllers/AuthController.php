@@ -110,10 +110,10 @@ class AuthController extends Controller
             value: $token,
             minutes: $tokenTtl,
             path: '/',
-            domain: env('COOKIE_DOMAIN', null),
-            secure: env('COOKIE_SECURE', false),
+            domain: null,
+            secure: env('APP_ENV') === 'production',
             httpOnly: true,
-            sameSite: 'Lax'
+            sameSite: 'Strict'
         );
        
 

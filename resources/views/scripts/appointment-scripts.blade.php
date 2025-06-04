@@ -132,7 +132,7 @@
             const startOfWeek = new Date(currentWeek);
             startOfWeek.setDate(currentWeek.getDate() - currentWeek.getDay() + 1);
 
-            for (let i = 0; i < 7; i++) {
+            for (let i = 0; i < 6; i++) {
                 const day = new Date(startOfWeek);
                 day.setDate(startOfWeek.getDate() + i);
 
