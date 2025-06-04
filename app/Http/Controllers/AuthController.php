@@ -111,9 +111,9 @@ class AuthController extends Controller
             minutes: $tokenTtl,
             path: '/',
             domain: null,
-            secure: env('APP_ENV') === 'production',
+            secure: false,
             httpOnly: true,
-            sameSite: 'Strict'
+            sameSite: 'Lax'
         );
        
 
