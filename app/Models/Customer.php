@@ -20,4 +20,8 @@ class Customer extends Model
     public function appointment(){
         return $this->hasMany(Appointment::class,'customer_id');
     }
+
+    public function vehicle(){
+        return $this->hasMany(Vehicle::class,'customer_id');
+    }
 }

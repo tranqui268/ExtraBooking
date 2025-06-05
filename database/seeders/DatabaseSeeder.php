@@ -17,7 +17,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             EmployeeSeeder::class,
             ServiceSeeder::class,
-            WorkingHourSeeder::class
+            WorkingHourSeeder::class,
+            PartSeeder::class
         ]);
     }
 }

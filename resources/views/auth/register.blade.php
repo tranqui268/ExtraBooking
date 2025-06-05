@@ -37,17 +37,7 @@
             </div>
       
             <button onclick="registerAsync()" type="button" class="btn btn-custom btn-block mb-3">Sign up with email</button>
-        </form>
-
-        <div class="text-center mb-3">— Or login with —</div>
-        <div class="d-flex justify-content-between">
-            <button class="btn btn-light w-100 mr-2">
-                <img src="https://img.icons8.com/color/20/000000/google-logo.png"/> Google
-            </button>
-            <button class="btn btn-light w-100 ml-2">
-                <img src="https://img.icons8.com/ios-filled/20/000000/mac-os.png"/> Apple
-            </button>
-        </div>
+        </form>     
 
         <div class="text-center mt-3">
             Already have an account? <a href={{ Route('login') }} class="text-login-custom font-weight-bold">Login Now</a>

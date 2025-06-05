@@ -157,6 +157,7 @@ class AppointmentController extends Controller
                 'data' => [
                     'id' => $appointment->id,
                     'customer_name' => $appointment->customer->name,
+                    'employee' => $appointment->employee->name,
                     'service' => $appointment->service->service_name,
                     'date' => $appointment->appointment_date,
                     'start_time' => $appointment->start_time->format('H:i:s'),

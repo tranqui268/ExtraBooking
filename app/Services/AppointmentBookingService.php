@@ -23,7 +23,7 @@ class AppointmentBookingService{
         TimeSlotRepositoryInterface $timeSlotRepo,
         AppointmentRepositoryInterface $appointmentRepo,
         EmployeeScheduleRepositoryInterface $employeeScheduleRepo,
-        CustomerRepositoryInterface $customerRepo
+        CustomerRepositoryInterface $customerRepo,
     ){
         $this->timeSlotRepo = $timeSlotRepo;
         $this->appoitmentRepo = $appointmentRepo;
@@ -178,7 +178,6 @@ class AppointmentBookingService{
             $slotStart = Carbon::parse($slotStartTime);
             
             if ($slotStart->gte($startTimeCarbon)) {
-                // Truy vấn trực tiếp để kiểm tra số nhân viên đã được đặt
                 $bookedEmployees = EmployeeSchedule::where('slot_id', $slotId)
                     ->where('status', 'booked')
                     ->count();
@@ -245,11 +244,9 @@ class AppointmentBookingService{
      protected function findAvailableEmployeeForSlots($slots)
     {
         Log::info('findAvailableEmployeeForSlots');
-        // Lấy danh sách nhân viên có thể làm việc trong tất cả các slot
         $availableEmployees = null;
         
         foreach ($slots as $slot) {
-            // Lấy slot_id
             $slotId = null;
             if (is_object($slot)) {
                 $slotId = $slot->slot_id ?? $slot->id ?? null;
@@ -269,19 +266,18 @@ class AppointmentBookingService{
             if ($availableEmployees === null) {
                 $availableEmployees = $slotAvailableEmployees;
             } else {
-                // Lấy giao của các nhân viên có sẵn
                 $availableEmployees = $availableEmployees->filter(function($employee) use ($slotAvailableEmployees) {
                     return $slotAvailableEmployees->contains('id', $employee->id);
                 });
             }
             
-            // Nếu không còn nhân viên nào có sẵn cho tất cả slot, thoát sớm
             if ($availableEmployees && $availableEmployees->count() == 0) {
                 return null;
             }
         }
 
-        return $availableEmployees && $availableEmployees->count() > 0 ? $availableEmployees->first() : null;
+        // return $availableEmployees && $availableEmployees->count() > 0 ? $availableEmployees->first() : null;
+        return $this->selectBestEmployee($availableEmployees,$slots);
     }
 
     public function getAvailableTimeSlots(string $date){
@@ -356,6 +352,95 @@ class AppointmentBookingService{
             })
             ->exists(); 
     }
+
+    private function hasConflictingAppointment1($customerId, $appointmentDate, $startTime, $endTime){
+        return DB::table('appointments')
+            ->where('customer_id', $customerId)
+            ->where('appointment_date', $appointmentDate)
+            ->where('status', '!=', 'cancelled')         
+            ->exists(); 
+    }
+
+    protected function getSlotDate($slot){
+        if (is_object($slot)) {
+            return $slot->slot_date ?? $slot->date ?? now()->format('Y-m-d');
+        } elseif (is_array($slot)) {
+            return $slot['slot_date'] ?? $slot['date'] ?? now()->format('Y-m-d');
+        }
+        
+        return now()->format('Y-m-d');
+    }
+
+    protected function selectBestEmployee($availableEmployees, $slots){
+        try {
+            $slotDate = $this->getSlotDate($slots[0]);
+            
+            Log::info('Selecting best employee', [
+                'available_count' => $availableEmployees->count(),
+                'slot_date' => $slotDate
+            ]);
+            
+            $employeesWithWorkload = $availableEmployees->map(function($employee) use ($slotDate) {
+                $dailyWorkload = EmployeeSchedule::where('employee_id', $employee->id)
+                    ->whereHas('timeSlot', function($query) use ($slotDate) {
+                        $query->where('slot_date', $slotDate);
+                    })
+                    ->where('status', 'booked')
+                    ->count();
+                    
+                
+                $weeklyWorkload = EmployeeSchedule::where('employee_id', $employee->id)
+                    ->whereHas('timeSlot', function($query) use ($slotDate) {
+                        $startOfWeek = Carbon::parse($slotDate)->startOfWeek();
+                        $endOfWeek = Carbon::parse($slotDate)->endOfWeek();
+                        $query->whereBetween('slot_date', [$startOfWeek, $endOfWeek]);
+                    })
+                    ->where('status', 'booked')
+                    ->count();
+                    
+                $employee->daily_workload = $dailyWorkload;
+                $employee->weekly_workload = $weeklyWorkload;
+                
+                Log::info('Employee workload', [
+                    'employee_id' => $employee->id,
+                    'name' => $employee->name ?? 'Unknown',
+                    'daily_workload' => $dailyWorkload,
+                    'weekly_workload' => $weeklyWorkload
+                ]);
+                
+                return $employee;
+            });
+            
+            
+            $selectedEmployee = $employeesWithWorkload
+                ->sortBy([
+                    ['daily_workload', 'asc'],      
+                    ['weekly_workload', 'asc'],     
+                    [function() { return rand(0, 100); }, 'asc'] 
+                ])
+                ->first();
+                
+            Log::info('Selected employee', [
+                'employee_id' => $selectedEmployee->id,
+                'name' => $selectedEmployee->name ?? 'Unknown',
+                'daily_workload' => $selectedEmployee->daily_workload,
+                'weekly_workload' => $selectedEmployee->weekly_workload
+            ]);
+            
+            return $selectedEmployee;
+            
+        } catch (\Exception $e) {
+            Log::error('Error in selectBestEmployee', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return $availableEmployees->first();
+        }
+    }
+
+
+
 
 
 

@@ -39,4 +39,8 @@ class Appointment extends Model
     public function service() : BelongsTo{
         return $this->belongsTo(Service::class,'service_id','id');
     }
+
+    public function repairOrder(){
+        return $this->hasOne(RepairOrder::class,'appointment_id');
+    }
 }

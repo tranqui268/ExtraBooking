@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('customer_id')->unsigned()->nullable(false);
+            $table->bigInteger('vehicle_id')->unsigned()->nullable(false);
             $table->string('employee_id',5)->nullable(false);
             $table->string('service_id',4)->nullable(false);
             $table->date('appointment_date')->nullable(false);

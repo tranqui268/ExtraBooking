@@ -60,7 +60,7 @@ class TimeSlotRepository extends BaseRepository implements TimeSlotRepositoryInt
                 'disabled' => $disabled,
             ];
             
-            $startTime->addMinutes(60);
+            $startTime->addMinutes(20);
         }
 
         $slotAvailable = $this->getAvailableTimeSlots($selectedDate);

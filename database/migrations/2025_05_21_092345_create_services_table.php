@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('service_name',50)->nullable(false);
             $table->integer('duration')->default(20);
             $table->decimal('base_price',8,2)->nullable(false);
+            $table->integer('maintenance_interval');
             $table->string('description',255)->nullable();
             $table->tinyInteger('is_delete')->default(0);
             $table->timestamps();

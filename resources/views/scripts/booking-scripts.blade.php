@@ -158,7 +158,7 @@
 
 
                     let isDisabled = slot.disabled;
-                    let disabledReason = slot.disabled ? 'Đã có lịch hẹn': '';
+                    let disabledReason = slot.disabled ? 'Đã có lịch hẹn' : '';
 
                     if (!isDisabled && serviceDuration && !isTimeSlotValid(slot.time, serviceDuration)) {
                         isDisabled = true;
@@ -251,6 +251,8 @@
                         invalidateCache(bookingDate);
                         $('#bookingForm')[0].reset();
                         $('#noteGroup').hide();
+                        durationText.style.display = 'none';
+                        durationText.textContent = '';
                         timeSlotsContainer.html('');
                     }
                 },
@@ -306,32 +308,32 @@
             });
         };
 
-    const resetTimeSlots = () => {
-        timeSlotsContainer.find('.time-btn').each(function () {
-            const $btn = $(this);
+        const resetTimeSlots = () => {
+            timeSlotsContainer.find('.time-btn').each(function () {
+                const $btn = $(this);
 
-            if ($btn.hasClass('insufficient-time')) {
-                $btn.prop('disabled', false)
-                    .removeClass('insufficient-time')
-                    .removeAttr('title');
-            }
-        });
-    };
+                if ($btn.hasClass('insufficient-time')) {
+                    $btn.prop('disabled', false)
+                        .removeClass('insufficient-time')
+                        .removeAttr('title');
+                }
+            });
+        };
 
-    function fetchWorkingHour(selectedDate){
-        $.ajax({
-            url: 'api/workinghours/byDate',
-            method: 'GET',
-            data: {
-                date: selectedDate
-            },
-            success: function(response){
-                STORE_CLOSING_TIME = response.data.end_time;
-                console.log(STORE_CLOSING_TIME);
-            }
-        });
+        function fetchWorkingHour(selectedDate) {
+            $.ajax({
+                url: 'api/workinghours/byDate',
+                method: 'GET',
+                data: {
+                    date: selectedDate
+                },
+                success: function (response) {
+                    STORE_CLOSING_TIME = response.data.end_time;
+                    console.log(STORE_CLOSING_TIME);
+                }
+            });
 
-    }
+        }
 
 
 

@@ -6,13 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+
     public function up(): void
     {
         Schema::table('appointments', function (Blueprint $table) {
             $table->foreign('customer_id')
                   ->references('id')
                   ->on('customers')
-                  ->onDelete('cascade');
+                  ->onDelete('restrict');
 
             $table->foreign('employee_id')
                   ->references('id')
@@ -23,6 +24,11 @@ return new class extends Migration
                   ->references('id')
                   ->on('services')
                   ->onDelete('restrict');
+
+            $table->foreign('vehicle_id')
+                  ->references('id')
+                  ->on('vehicles')
+                  ->onDelete('restrict');
         });
     }
 
@@ -32,6 +38,7 @@ return new class extends Migration
             $table->dropForeign(['service_id']);
             $table->dropForeign(['employee_id']);
             $table->dropForeign(['customer_id']);
+            $table->dropForeign(['vehicle_id']);
         });
     }
 };
