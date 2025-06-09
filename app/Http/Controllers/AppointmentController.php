@@ -6,7 +6,6 @@ use App\Http\Requests\BookAppointmentRequest;
 use App\Repositories\Appointment\AppointmentRepositoryInterface;
 use App\Services\AppointmentBookingService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\PersonalAccessToken;
 
@@ -24,7 +23,10 @@ class AppointmentController extends Controller
         return view('appointment.index');
     }
 
-    public function getWithFilters(Request $request){
+    public function getWithFilters(Request $request){  
+        $user = $request->user();
+        Log::info('user',['data' => $user]);
+        $request->merge(['user'=> $user]);
         try {
             $appointments = $this->appointmentRepo->filters($request);
             return response()->json([
@@ -117,10 +119,10 @@ class AppointmentController extends Controller
 
     public function getAppointmentsUser(Request $request){
         try {
-            $token = $request->bearerToken();
-            $userFromToken = PersonalAccessToken::findToken($token)?->tokenable;
+            // $token = $request->bearerToken();
+            // $userFromToken = PersonalAccessToken::findToken($token)?->tokenable;
 
-            Auth::setUser($userFromToken);
+            // Auth::setUser($userFromToken);
 
             $user = $request->user();
             if (!$user) {
@@ -134,7 +136,7 @@ class AppointmentController extends Controller
             $date = $request->get('date', now()->format('Y-m-d'));
 
             $bookings = $this->appointmentRepo->getAppointmentsUser($user,$view,$date);
-            Log::info($bookings);
+            Log::info($user);
             
             return response()->json([
                 'success' => true,

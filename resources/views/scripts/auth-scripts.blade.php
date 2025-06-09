@@ -74,7 +74,7 @@
             let password = $('#password').val();
             let confirmPassword = $('#confirmPassword').val();
 
-            const errorIds = ['#nameError', '#emailError', '#passwordError', '#passwordConfirmError'];
+            const errorIds = ['#nameError', '#emailError', '#passwordError', '#passwordConfirmError', '#phoneError'];
             errorIds.forEach(id => $(id).text(''));
 
             if (validateInput(email,name,phone,password,confirmPassword)) {

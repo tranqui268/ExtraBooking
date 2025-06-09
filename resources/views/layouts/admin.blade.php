@@ -36,7 +36,7 @@
                 <i class="icon bi bi-person-badge"></i> Employee Management
             </a>
 
-            <a id="schedule-menu" href="{{ url('/admin/staff') }}" class="nav-link">
+            <a id="schedule-menu" href="{{ url('/admin/bookings') }}" class="nav-link">
                 <i class="icon bi bi-person-badge"></i> Schedule
             </a>
 

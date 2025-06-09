@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Appointment;
 
+use App\Enums\Role;
 use App\Models\Appointment;
 use App\Repositories\BaseRepository;
 use Carbon\Carbon;
@@ -17,6 +18,18 @@ class AppointmentRepository extends BaseRepository implements AppointmentReposit
     {
         $query = $this->model->query();
 
+        $user = $filters['user'];
+        
+        if ($user) {  
+            $role = $user->role;     
+            $userId = $user->id;
+            if ($role->value === 'employee') {
+                $query->whereHas('employee', function($q) use ($userId){
+                    $q->where('user_id',$userId);
+                });
+            }
+        }
+   
         if (!empty($filters['customer_name'])) {
             $customerName = $filters['customer_name'];
             $query->whereHas('customer', function($q) use ($customerName){
@@ -144,5 +157,9 @@ class AppointmentRepository extends BaseRepository implements AppointmentReposit
 
            })
            ->get();
+    }
+
+    private function filterAdmin($filters){
+        
     }
 }

@@ -4,8 +4,11 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\PartController;
+use App\Http\Controllers\RepairOrderController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TimeSlotController;
+use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\WorkingHourController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,7 +24,7 @@ Route::get('/employees/getAll',[EmployeeController::class,'getAll']);
 Route::post('/timeslots/generate-slot',[TimeSlotController::class,'generateTimeSlot']);
 Route::post('/timeslots/generate-db',[TimeSlotController::class,'generateTimeSlotDb']);
 
-Route::prefix('appointments')->group(function () {
+Route::middleware('require.api.token')->prefix('appointments')->group(function () {
     Route::get('/available-slots', [AppointmentController::class, 'getAvailableTimeSlots']);
     Route::post('/book', [AppointmentController::class, 'bookAppointment']);
     Route::put('/{appointmentId}/cancel', [AppointmentController::class, 'cancelAppointment']);
@@ -29,7 +32,11 @@ Route::prefix('appointments')->group(function () {
     Route::get('/bookings',[AppointmentController::class,'getAppointmentsUser']);
     Route::get('/{appointmentId}',[AppointmentController::class,'getById']);
     Route::get('/',[AppointmentController::class,'getWithFilters']);
-})->middleware(['auth:sanctum']);
+});
+
+Route::middleware('require.api.token')->prefix('repairOrders')->group(function(){
+    Route::post('/create',[RepairOrderController::class,'createOrder']);
+});
 
 
 
@@ -44,7 +51,15 @@ Route::prefix('services')->group(function(){
     Route::put('/{id}',[ServiceController::class,'update']);
 });
 
-Route::prefix('workinghours')->group(function(){
+Route::middleware('require.api.token')->prefix('workinghours')->group(function(){
     Route::get('/byDate',[WorkingHourController::class, 'getWorkingHourByDate']);
+});
+
+Route::middleware('require.api.token')->prefix('vehicles')->group(function(){
+    Route::get('/byCustomer/{customerId}',[VehicleController::class,'getByCustomer']);
+});
+
+Route::middleware('require.api.token')->prefix('parts')->group(function(){
+    Route::get('/getAll',[PartController::class,'getAll']);
 });
 

@@ -44,7 +44,26 @@ class AppServiceProvider extends ServiceProvider
             \App\Repositories\Customer\CustomerRepository::class
         );
 
-        
+        $this->app->bind(
+            \App\Repositories\Vehicle\VehicleRepositoryInterface::class,
+            \App\Repositories\Vehicle\VehicleRepository::class
+        );
+
+        $this->app->bind(
+            \App\Repositories\Part\PartRepositoryInterface::class,
+            \App\Repositories\Part\PartRepository::class
+        );
+
+        $this->app->bind(
+            \App\Repositories\RepairOrder\RepairOrderRepositoryInterface::class,
+            \App\Repositories\RepairOrder\RepairOrderRepository::class
+        );
+
+        $this->app->bind(
+            \App\Repositories\RepairOrderPart\RepairOrderPartRepositoryInterface::class,
+            \App\Repositories\RepairOrderPart\RepairOrderPartRepository::class
+        );
+       
     }
 
     public function boot(): void

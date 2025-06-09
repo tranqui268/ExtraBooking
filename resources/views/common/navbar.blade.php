@@ -25,6 +25,9 @@
       <li class="nav-item">
         <a class="nav-link" href="{{ url('/appointments') }}" data-page="appointments">Lịch hẹn</a>
       </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url("/lookup") }}" data-page="lookup">Tra cứu</a>
+      </li>
     </ul>
 
     <ul class="navbar-nav ml-auto">

@@ -104,6 +104,13 @@ class AppointmentBookingService{
                 throw new \Exception('Khách hàng không tồn tại');
             }
 
+            $vehicle = $customer->vehicle()->first();
+            Log::info('Vehicle',['data' => $vehicle]);
+
+            if (!$vehicle) {
+                throw new \Exception('Khách hàng chưa khai báo xe trên hệ thống');
+            }
+
             if ($this->hasConflictingAppointment(
                 $customer->id, 
                 $appointmentDate->format('Y-m-d'), 
@@ -115,6 +122,7 @@ class AppointmentBookingService{
 
             $appointmentData = [
                 'customer_id' => $customer->id,
+                'vehicle_id' => $vehicle->id,
                 'service_id' => $bookingData['service_id'],
                 'appointment_date' => $appointmentDate->format('Y-m-d'),
                 'start_time' => $startTime,
