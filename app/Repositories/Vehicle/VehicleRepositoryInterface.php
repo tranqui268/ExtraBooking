@@ -6,4 +6,5 @@ use App\Repositories\RepositoryInterface;
 
 interface VehicleRepositoryInterface extends RepositoryInterface{
     public function getByCustomer($customerId);
+    public function vehicleLookup($data);
 }

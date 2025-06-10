@@ -6,6 +6,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\PartController;
 use App\Http\Controllers\RepairOrderController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TimeSlotController;
 use App\Http\Controllers\VehicleController;
@@ -36,6 +37,7 @@ Route::middleware('require.api.token')->prefix('appointments')->group(function (
 
 Route::middleware('require.api.token')->prefix('repairOrders')->group(function(){
     Route::post('/create',[RepairOrderController::class,'createOrder']);
+    Route::get('/lookup',[RepairOrderController::class,'getRepairOrderLookup']);
 });
 
 
@@ -57,9 +59,14 @@ Route::middleware('require.api.token')->prefix('workinghours')->group(function()
 
 Route::middleware('require.api.token')->prefix('vehicles')->group(function(){
     Route::get('/byCustomer/{customerId}',[VehicleController::class,'getByCustomer']);
+    Route::get('/lookup',[VehicleController::class,'vehicleLookup']);
 });
 
 Route::middleware('require.api.token')->prefix('parts')->group(function(){
     Route::get('/getAll',[PartController::class,'getAll']);
+});
+
+Route::middleware('require.api.token')->prefix('reviews')->group(function(){
+    Route::post('/',[ReviewController::class,'create']);
 });
 

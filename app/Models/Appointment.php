@@ -44,4 +44,8 @@ class Appointment extends Model
     public function repairOrder(){
         return $this->hasOne(RepairOrder::class,'appointment_id');
     }
+
+    public function vehicle(){
+        return $this->belongsTo(Vehicle::class,'vehicle_id','id');
+    }
 }

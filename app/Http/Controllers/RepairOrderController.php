@@ -29,4 +29,20 @@ class RepairOrderController extends Controller
         }
 
     }
+
+    public function getRepairOrderLookup(Request $request){
+        try {
+            $result = $this->repairOrderService->getRepairOrderLookup($request);
+            return response()->json([
+                'success' => true,
+                'data' => $result,
+                'message' => 'Lấy dữ liệu thành công'
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

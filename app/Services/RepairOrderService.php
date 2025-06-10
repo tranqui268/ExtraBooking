@@ -28,23 +28,35 @@ class RepairOrderService{
             $partIds = $data['parts'];
             $quantities = $data['quantities'];
             $partsCost = $this->calPartsCost($partIds,$quantities); 
-            
-            $repairOrderData = [
-                'appointment_id' => $data['appointmentId'],
-                'description' => $data['description'],
-                'diagnosis' => $data['diagnosis'],
-                'work_performed' => $data['workPerformed'],
-                'technician_notes' => $data['technicianNotes'],
-                'labor_cost' => 20000,
-                'parts_cost' => $partsCost,
-                'total_cost' => $partsCost+20000
-            ];
+            $laborCost = 20000;
+            $totalCost = $partsCost + $laborCost;
 
-            $repairOrder = $this->repairOrderRepo->create($repairOrderData);
-            if (!$repairOrder) {
-                throw new \Exception('Tạo đơn sửa chữa không thành công');
+            $repairOrder = $this->repairOrderRepo->findByAppointmentId($data['appointmentId']);
+
+            if ($repairOrder) {
+                $repairOrder->update([
+                    'parts_cost' => DB::raw("parts_cost + $partsCost"),
+                    'total_cost' => DB::raw("total_cost + $partsCost"),
+                ]);
+            } else{
+                $repairOrderData = [
+                    'appointment_id' => $data['appointmentId'],
+                    'description' => $data['description'],
+                    'diagnosis' => $data['diagnosis'],
+                    'work_performed' => $data['workPerformed'],
+                    'technician_notes' => $data['technicianNotes'],
+                    'labor_cost' => $laborCost,
+                    'parts_cost' => $partsCost,
+                    'total_cost' => $totalCost
+                ];
+
+                $repairOrder = $this->repairOrderRepo->create($repairOrderData);
+                if (!$repairOrder) {
+                    throw new \Exception('Tạo đơn sửa chữa không thành công');
+                }
+
             }
-
+                       
             $this->saveRepairOrderPart(
                 $repairOrder->id,
                 $repairOrder->technician_notes,
@@ -55,9 +67,11 @@ class RepairOrderService{
             $this->partRepo->updatePartsStock($partIds,$quantities);
 
             return $repairOrder;
-        });
-        
+        });       
+    }
 
+    public function getRepairOrderLookup($data){
+        return $this->repairOrderRepo->getRepairOrderLookup($data);
     }
 
     private function calPartsCost(array $partIds, array $quantities){

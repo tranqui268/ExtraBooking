@@ -30,4 +30,8 @@ class Vehicle extends Model
     public function maintenanceSchedules(){
         return $this->hasMany(MaintenanceSchedule::class,'vehicle_id');
     }
+
+    public function appointments(){
+        return $this->hasMany(Appointment::class,'vehicle_id');
+    }
 }

@@ -27,6 +27,10 @@ class StoreServiceRequest extends FormRequest
                 'integer',
                 'min:1'
             ],
+            'maintenance_interval' => [
+                'required',
+                'integer'
+            ],
             'duration' => [
                 'required',
                 'integer',
@@ -49,6 +53,8 @@ class StoreServiceRequest extends FormRequest
             'base_price.required' => 'Giá là bắt buộc',
             'base_price.integer' => 'Giá phải là số nguyên',
             'base_price.min' => 'Giá phải là số nguyên dương', 
+            'maintenance_interval' => 'Thời gian bảo trì là bắt buộc',
+            'maintenance_interval' => 'Thời gian bảo trì phải là số nguyên dương',
             'duration.required' => 'Giá là bắt buộc',
             'duration.integer' => 'Giá phải là số nguyên',
             'duration.min' => 'Giá phải là số nguyên dương'           

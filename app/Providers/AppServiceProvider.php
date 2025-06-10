@@ -63,6 +63,16 @@ class AppServiceProvider extends ServiceProvider
             \App\Repositories\RepairOrderPart\RepairOrderPartRepositoryInterface::class,
             \App\Repositories\RepairOrderPart\RepairOrderPartRepository::class
         );
+
+        $this->app->bind(
+            \App\Repositories\Review\ReviewRepositoryInterface::class,
+            \App\Repositories\Review\ReviewRepository::class
+        );
+
+        $this->app->bind(
+            \App\Repositories\MaintenanceSchedule\MaintenanceScheduleRepositoryInterface::class,
+            \App\Repositories\MaintenanceSchedule\MaintenanceScheduleRepository::class
+        );
        
     }
 

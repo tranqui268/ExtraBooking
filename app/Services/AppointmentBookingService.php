@@ -8,6 +8,7 @@ use App\Models\Service;
 use App\Repositories\Appointment\AppointmentRepositoryInterface;
 use App\Repositories\Customer\CustomerRepositoryInterface;
 use App\Repositories\EmployeeSchedule\EmployeeScheduleRepositoryInterface;
+use App\Repositories\MaintenanceSchedule\MaintenanceScheduleRepositoryInterface;
 use App\Repositories\TimeSlot\TimeSlotRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -18,17 +19,20 @@ class AppointmentBookingService{
     protected $appoitmentRepo;
     protected $employeeScheduleRepo;
     protected $customerRepo;
+    protected $maintenanceRepo;
 
     public function __construct(
         TimeSlotRepositoryInterface $timeSlotRepo,
         AppointmentRepositoryInterface $appointmentRepo,
         EmployeeScheduleRepositoryInterface $employeeScheduleRepo,
         CustomerRepositoryInterface $customerRepo,
+        MaintenanceScheduleRepositoryInterface $maintenanceRepo
     ){
         $this->timeSlotRepo = $timeSlotRepo;
         $this->appoitmentRepo = $appointmentRepo;
         $this->employeeScheduleRepo = $employeeScheduleRepo;
         $this->customerRepo = $customerRepo;
+        $this->maintenanceRepo = $maintenanceRepo;
     }
 
     public function bookAppointment(array $bookingData){
@@ -152,6 +156,23 @@ class AppointmentBookingService{
                         );
                     }
             }
+
+            $maintenanceInterval = $service->maintenance_interval;
+            $nextMaintenance = $appointmentDate->copy()->addMonths($maintenanceInterval)->format('Y-m-d');
+
+            $maintenanceSchedules = [
+                'vehicle_id' => $appointment->vehicle_id,
+                'service_id' => $service->id,
+                'last_maintenance_date' => $appointment->appointment_date,
+                'next_maintenance_date' => $nextMaintenance,
+                'maintenance_interval' => $maintenanceInterval,
+                'mileage_interval' => 1000,
+                'current_mileage' => 500,
+                'notes' => 'Bảo dưỡng định kỳ'
+            ];
+            $this->maintenanceRepo->create($maintenanceSchedules);
+
+
 
             return $appointment;
 
