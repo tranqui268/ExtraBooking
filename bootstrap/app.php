@@ -1,8 +1,10 @@
 <?php
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -23,4 +25,20 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })->withSchedule(function (Schedule $schedule){
+        $schedule->command('maintenance:send-reminders --type=upcoming --days=7')
+                 ->dailyAt('08:00')
+                 ->withoutOverlapping()
+                 ->runInBackground();
+        
+        $schedule->command('maintenance:send-reminders --type=upcoming --days=1')
+                 ->dailyAt('06:00')
+                 ->withoutOverlapping()
+                 ->runInBackground();
+        
+        $schedule->command('maintenance:send-reminders --type=overdue')
+                 ->twiceDaily(9, 15)
+                 ->withoutOverlapping()
+                 ->runInBackground();
+    })
+    ->create();
