@@ -73,6 +73,11 @@ class AppServiceProvider extends ServiceProvider
             \App\Repositories\MaintenanceSchedule\MaintenanceScheduleRepositoryInterface::class,
             \App\Repositories\MaintenanceSchedule\MaintenanceScheduleRepository::class
         );
+
+        $this->app->bind(
+            \App\Repositories\OtpCode\OtpCodeRepositoryInterface::class,
+            \App\Repositories\OtpCode\OtpCodeRepository::class
+        );
        
     }
 

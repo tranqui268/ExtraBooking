@@ -12,10 +12,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/',[AuthController::class,'index']);
 Route::get('/register',[AuthController::class,'showRegister'])->name('register');
 Route::get('/login',[AuthController::class,'index'])->name('login');
+Route::get('/loginOtp',[AuthController::class,'showLoginOtp'])->name('login-otp');
+
 
 Route::get('/services',[ServiceController::class,'index']);
 Route::get('/employees',[EmployeeController::class,'index']);
-Route::get("/bookings",[BookingController::class,'index'])->name('bookings');
+Route::get('/bookings',[BookingController::class,'index'])->name('bookings');
 Route::get('/appointments',[AppointmentController::class,'showAppointmentUser']);
 Route::get('/lookup',[LookUpController::class,'index']);
 

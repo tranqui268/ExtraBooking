@@ -2,6 +2,8 @@
 
     let userRole = null;
     let userProfile = null;
+    let currentPhone = '';
+    let countdownTimer = null;
 
     function getCsrfTokenAsync() {
         return new Promise((resolve, reject) => {
@@ -77,7 +79,7 @@
             const errorIds = ['#nameError', '#emailError', '#passwordError', '#passwordConfirmError', '#phoneError'];
             errorIds.forEach(id => $(id).text(''));
 
-            if (validateInput(email,name,phone,password,confirmPassword)) {
+            if (validateInput(email, name, phone, password, confirmPassword)) {
                 return;
             }
 
@@ -186,7 +188,7 @@
             userRole = response.user.role;
             userProfile = response.profile;
             if (userRole === 'user') {
-                $('#user-name').text(`Chào ${userProfile.name}`).attr('data-id',userProfile.id);
+                $('#user-name').text(`Chào ${userProfile.name}`).attr('data-id', userProfile.id);
             } else {
                 updateMenuByRole(userRole);
             }
@@ -206,6 +208,82 @@
             }
 
         }
+    }
+
+    function sendOtp() {
+        const phone = document.getElementById('phone').value.trim();
+        const phoneError = document.getElementById('phoneError');
+        phoneError.textContent = '';
+
+        if (!phone) {
+            phoneError.textContent = 'Số điện thoại không được để trống';
+            return;
+        }
+
+        const sendBtn = event.target;
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'Đang gửi...';
+
+        $.ajax({
+            url: "{{ url('api/auth/otp/send') }}",
+            method: 'POST',
+            data: {
+                phone: phone
+            },
+            success: function (response) {
+                currentPhone = phone;
+                showOtpStep();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công',
+                    text: 'Đã gửi OTP vui lòng kiểm tra',
+                });
+                startCountdown();
+            },
+            error: function () {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: 'Không thể gửi OTP. Vui lòng thử lại',
+                });
+            },
+            complete: function () {
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Gửi mã OTP';
+            }
+        });
+    }
+
+    function showOtpStep() {
+        document.getElementById('phone-step').classList.add('hidden');
+        document.getElementById('otp-step').classList.remove('hidden');
+        document.querySelector('.otp-input').focus();
+    }
+
+    function startCountdown() {
+        let timeLeft = 60;
+        const timerText = document.getElementById('timer-text');
+        const countdownSpan = document.getElementById('countdown');
+        const resendBtn = document.getElementById('resend-btn');
+
+        timerText.classList.remove('hidden');
+        resendBtn.classList.add('hidden');
+
+        if (countdownTimer !== null) {
+            clearInterval(countdownTimer);
+        }
+
+        countdownTimer = setInterval(function () {
+            timeLeft--;
+            countdownSpan.textContent = timeLeft;
+
+            if (timeLeft <= 0) {
+                clearInterval(countdownTimer);
+                countdownTimer = null;
+                timerText.classList.add('hidden');
+                resendBtn.classList.remove('hidden');
+            }
+        }, 1000);
     }
 
     function updateMenuByRole(role) {
@@ -283,9 +361,100 @@
 
 
     $(document).ready(function () {
-        if (!['/login', '/register', '/'].includes(window.location.pathname)) {
+        if (!['/login', '/register', '/', '/loginOtp', '/otpForm'].includes(window.location.pathname)) {
             fetchUser();
         }
     });
+
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const icon = document.getElementById('toggleIcon');
+
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+
+        icon.classList.toggle('bi-eye-fill', !isPassword);
+        icon.classList.toggle('bi-eye-slash-fill', isPassword);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const otpInputs = document.querySelectorAll('.otp-input');
+
+
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', function (e) {
+                if (this.value.length === 1 && index < 5) {
+                    otpInputs[index + 1].focus();
+                }
+            });
+
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Backspace' && !this.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+
+            const otp = Array.from(otpInputs).map(i => i.value).join('');
+            if (otp.length === 6) {
+                verifyOtp();
+            }
+        });
+    });
+
+    function verifyOtp() {
+        const inputs = document.querySelectorAll('.otp-input');
+        const otp = Array.from(inputs).map(i => i.value).join('');
+
+        if (otp.length !== 6) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: 'Vui lòng nhập đủ OTP'
+            });
+            return;
+        }
+
+        inputs.forEach(input => input.disabled = true);
+
+        $.ajax({
+            url: '{{ url("api/auth/otp/verify") }}',
+            method: 'POST',
+            data: {
+                phone: currentPhone,
+                otp_code: otp
+            },
+            success: function (response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Đăng nhập thành công',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = '/bookings';
+                });
+
+            },
+            error: function (xhr) {
+                let message = 'Có lỗi xảy ra, vui lòng thử lại';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    message = xhr.responseJSON.message;
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Đăng nhập thất bại',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+
+                // Enable lại inputs
+                inputs.forEach(input => {
+                    input.disabled = false;
+                });
+                inputs[0].focus();
+            }
+        });
+    }
+
 
 </script>

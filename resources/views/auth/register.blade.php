@@ -26,13 +26,11 @@
 
             <div class="form-group position-relative">
                 <input id="password" type="password" name="password" class="form-control" placeholder="Password" required>
-                <span class="position-absolute" style="right: 10px; top: 10px; cursor: pointer;"><i class="bi bi-eye-fill"></i></span>
                 <small class="text-danger" id="passwordError"></small>
             </div>
 
             <div class="form-group position-relative">
                 <input id="confirmPassword" type="password" name="confirmPassword" class="form-control" placeholder="Password Confirm" required>
-                <span class="position-absolute" style="right: 10px; top: 10px; cursor: pointer;"><i class="bi bi-eye-fill"></i></span>
                 <small class="text-danger" id="passwordConfirmError"></small>
             </div>
       

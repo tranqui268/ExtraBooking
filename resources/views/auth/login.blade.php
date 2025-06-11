@@ -15,7 +15,9 @@
 
             <div class="form-group position-relative">
                 <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
-                <span class="position-absolute" style="right: 10px; top: 10px; cursor: pointer;"><i class="bi bi-eye-fill"></i></span>
+                <span class="position-absolute" style="right: 10px; top: 10px; cursor: pointer;" onclick="togglePassword()">
+                    <i id="toggleIcon" class="bi bi-eye-fill"></i>
+                </span>
             </div>
 
             <div class="form-group d-flex justify-content-between align-items-center">
@@ -40,6 +42,9 @@
             </button>
             <button class="btn btn-light w-100 ml-2">
                 <img src="https://img.icons8.com/ios-filled/20/000000/mac-os.png"/> Apple
+            </button>
+            <button class="btn btn-light  w-100 ml-2" onclick="window.location.href='{{ route('login-otp') }}'">
+                <img src="https://img.icons8.com/color/20/apple-phone.png"/> Phone
             </button>
         </div>
 

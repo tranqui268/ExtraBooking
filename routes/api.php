@@ -70,3 +70,8 @@ Route::middleware('require.api.token')->prefix('reviews')->group(function(){
     Route::post('/',[ReviewController::class,'create']);
 });
 
+Route::prefix('auth')->group(function (){
+    Route::post('/otp/send',[AuthController::class,'sendOtp']);
+    Route::post('/otp/verify',[AuthController::class,'verifyOtp']);
+    Route::post('/otp/resend',[AuthController::class,'resendOtp']);
+});

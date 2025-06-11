@@ -12,13 +12,35 @@ class OtpCode extends Model
     protected $fillable = [
         'id',
         'phone',
+        'otp_code',
         'purpose',
         'is_used',
         'attempts',
         'expires_at'
     ];
 
-    protected $hidden = [
-        'otp_code'
+    protected $casts = [
+        'expires_at' => 'datetime'
     ];
+
+    public function isExpired(){
+        return $this->expires_at < now();
+    }
+
+    public function isValid(){
+        return !$this->is_used && !$this->isExpired() && $this->attempts < 3;
+    }
+
+    public function incrementAttempts()
+    {
+        $this->increment('attempts');
+    }
+
+    public function markAsUsed()
+    {
+        $this->update([
+            'is_used' => true,
+            'updated_at' => now()
+        ]);
+    }
 }

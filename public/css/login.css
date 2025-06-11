@@ -12,7 +12,17 @@ body {
     margin-bottom: 40px;
 }
 
-.logo-image{
+#otp-step {
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    width: 400px;
+    max-width: 800px;
+    margin-bottom: 40px;
+}
+
+.logo-image {
     width: 100px;
     height: 100px;
 }
@@ -37,6 +47,58 @@ body {
     margin-right: 5px;
 }
 
-.text-login-custom{
+.text-login-custom {
     color: #9FA324;
+}
+
+.otp-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.otp-input {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    font-size: 18px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+}
+
+.otp-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.resend-timer {
+    text-align: center;
+    margin-top: 1rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.resend-btn {
+    background: transparent;
+    color: #667eea;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 0.9rem;
+}
+
+.resend-btn:hover {
+    color: #5a67d8;
+}
+
+.resend-btn:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+    text-decoration: none;
+}
+
+.hidden {
+    display: none;
 }
